@@ -13,11 +13,11 @@
     "deploy:release": " git push --tags && git push && npm run build && npm publish && npm run deploy:create-github-release",
     "deploy:create-github-release": "tar -czvf dist.tar.gz dist && gh release create v$npm_package_version --generate-notes dist.tar.gz",
     "test": "npm run test:unit && npm run test:e2e && npm run test:llm",
-    "test:unit": "find src -name '*.test.ts' | xargs tsx --test",
-    "test:e2e": "npm run build && find src -name '*.e2etest.ts' | xargs tsx --test --test-concurrency=1",
-    "test:llm": "find src -name '*.llmtest.ts' | xargs tsx --test --test-concurrency=1",
-    "test:openai": "npm run build && find src -name '*.openaitest.ts' | xargs tsx --test",
-    "test:gemini": "npm run build && find src -name '*.geminitest.ts' | xargs tsx --test",
+    "test:unit": "node scripts/run-tests.mjs unit",
+    "test:e2e": "npm run build && node scripts/run-tests.mjs e2e",
+    "test:llm": "node scripts/run-tests.mjs llm",
+    "test:openai": "npm run build && node scripts/run-tests.mjs openai",
+    "test:gemini": "npm run build && node scripts/run-tests.mjs gemini",
     "lint": "npm run lint:prettier && npm run lint:eslint",
     "lint:prettier": "prettier --check src/* src/**/*",
     "lint:eslint": "eslint src/* src/**/*",
@@ -56,11 +56,13 @@
     "commander": "^13.0.0",
     "dotenv": "^16.4.5",
     "ipull": "^3.9.0",
-    "node-llama-cpp": "^3.0.0-beta.40",
     "openai": "^4.55.1",
     "tsx": "^4.16.2",
     "typescript": "^5.5.4",
     "webcrack": "^2.13.0"
+  },
+  "optionalDependencies": {
+    "node-llama-cpp": "^3.0.0-beta.40"
   },
   "devDependencies": {
     "@eslint/js": "^9.8.0",
