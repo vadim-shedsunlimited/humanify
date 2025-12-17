@@ -118,6 +118,18 @@ There are several ways to provide the API key to the tool:
 humanify openai --apiKey="your-token" obfuscated-file.js
 ```
 
+You can also pass multiple input bundles (for example a main bundle plus additional chunks), and Humanify will extract all of them into the same output directory before processing:
+
+```shell
+humanify openai --apiKey="your-token" main.bundle.js chunk-a.js chunk-b.js -o output
+```
+
+To continue an existing run without re-extracting, use `--resume` (inputs are optional in resume mode):
+
+```shell
+humanify openai --resume -o output
+```
+
 Alternatively you can also use an environment variable `OPENAI_API_KEY`. Use
 `humanify --help` to see all available options.
 
