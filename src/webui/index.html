@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Humanify Web UI</title>
+    <link rel="stylesheet" href="styles/index.css" />
+    <!-- Highlight.js for syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="scripts/index.js" defer></script>
+</head>
+
+<body>
+    <main class="shell">
+        <header class="hero">
+            <div>
+                <p class="eyebrow">Humanify Web Console</p>
+                <h1>Run, monitor, and iterate without leaving your browser</h1>
+                <p class="lede">Profiles live alongside your CLI configuration, so everything stays reproducible. Kick
+                    off jobs, keep an eye on logs, and resume work without retyping long command strings.</p>
+            </div>
+            <div class="hero-cta">
+                <div class="hero-stat">
+                    <span class="hero-stat__label">Status</span>
+                    <span class="hero-stat__value" id="heroStatusLabel">Idle</span>
+                </div>
+                <p class="muted small">This UI wraps the exact same <strong>humanify</strong> CLI that you already
+                    trust.</p>
+            </div>
+        </header>
+
+        <section class="layout">
+            <section class="panel panel--form">
+                <div class="section-heading">
+                    <h2>Profiles & Inputs</h2>
+                    <p class="muted small">Save reusable presets for every target bundle. Inputs are stored locally
+                        inside your home directory.</p>
+                </div>
+
+                <div class="field-grid">
+                    <div class="field">
+                        <label>Profile</label>
+                        <select id="profileSelect"></select>
+                    </div>
+                    <div class="field">
+                        <label>Profile Name</label>
+                        <input id="profileName" placeholder="My profile" />
+                    </div>
+                    <div class="field">
+                        <label>Profile Actions</label>
+                        <div class="button-row">
+                            <button type="button" class="secondary" id="saveProfile">Save</button>
+                            <button type="button" class="secondary" id="newProfile">New</button>
+                            <button type="button" class="danger" id="deleteProfile">Delete</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field-grid">
+                    <div class="field">
+                        <label>Provider</label>
+                        <select id="provider">
+                            <option value="copilot">copilot</option>
+                            <option value="openai">openai</option>
+                            <option value="gemini">gemini</option>
+                            <option value="local">local</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Model</label>
+                        <input id="model" placeholder="Custom model (optional)" />
+                    </div>
+                    <div class="field">
+                        <label>Context Size</label>
+                        <input id="contextSize" type="number" min="0" step="1" value="4096" />
+                    </div>
+                    <div class="field">
+                        <label>Agents</label>
+                        <input id="agents" type="number" min="1" step="1" value="4" />
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>Output Directory</label>
+                    <input id="outputDir" placeholder="C:\\path\\to\\output" />
+                </div>
+
+                <div class="field">
+                    <label>Input Files (one per line; ignored when Resume is enabled)</label>
+                    <textarea id="inputs"
+                        placeholder="C:\\path\\to\\bundle.js\nC:\\path\\to\\vendor.bundle.js"></textarea>
+                </div>
+
+                <div class="field-grid">
+                    <div class="field">
+                        <label>Resume existing run</label>
+                        <label class="toggle"><input id="resume" type="checkbox" /> Resume from output directory
+                            only</label>
+                    </div>
+                    <div class="field">
+                        <label>Continue on error</label>
+                        <label class="toggle"><input id="continueOnError" type="checkbox" /> Attempt to finish remaining
+                            tasks</label>
+                    </div>
+                </div>
+
+                <div class="field-grid">
+                    <div class="field">
+                        <label>OpenAI Base URL</label>
+                        <input id="baseURL" placeholder="https://api.openai.com/v1" />
+                    </div>
+                    <div class="field">
+                        <label>API Key</label>
+                        <input id="apiKey" placeholder="Stored in profile" autocomplete="off" />
+                    </div>
+                </div>
+
+                <div class="field-grid">
+                    <div class="field">
+                        <label>Local Seed</label>
+                        <input id="seed" placeholder="Optional seed for local mode" />
+                    </div>
+                    <div class="field">
+                        <label>Disable GPU</label>
+                        <label class="toggle"><input id="disableGpu" type="checkbox" /> Force CPU only</label>
+                    </div>
+                </div>
+
+                <div class="button-row" style="margin-top: 12px;">
+                    <button type="button" class="primary" id="start">Start run</button>
+                    <button type="button" class="secondary" id="stop">Stop</button>
+                    <span class="hint" id="startHint"></span>
+                </div>
+            </section>
+
+            <section class="panel panel--run">
+                <div class="statusHero">
+                    <div>
+                        <span class="statusBadge" id="statusBadge" data-state="idle">IDLE</span>
+                        <div class="statusTitle" id="statusTitle">Waiting for the next run</div>
+                        <p class="statusMeta" id="statusMeta">Start a run to see live telemetry and logs.</p>
+                    </div>
+                    <div class="statusTime" id="statusTime">&nbsp;</div>
+                </div>
+
+                <div class="progressCard">
+                    <div class="progressTitleRow">
+                        <span>Task Progress</span>
+                        <span id="progressPercent">--</span>
+                    </div>
+                    <div class="progressBar">
+                        <span id="progressBar" style="--progress:0%;"></span>
+                    </div>
+                    <div class="muted small" id="progressMeta">Waiting for .humanify.tasks.json</div>
+                    <div class="taskGrid" id="taskGrid">
+                        <div class="metric">
+                            <div class="metric__value">0</div>
+                            <div class="metric__label">Total Tasks</div>
+                        </div>
+                    </div>
+                    <div class="agentsContainer" id="agentsContainer"></div>
+                </div>
+
+                <div class="metaCard">
+                    <div class="metaTitle">Current Command</div>
+                    <div class="metaList" id="runtimeMeta">
+                        <p class="muted small">Command details will appear once a run is active.</p>
+                    </div>
+                </div>
+
+                <!-- logs moved to full-width section below -->
+            </section>
+        </section>
+    </main>
+
+    <section class="panel panel--tasks" style="max-width:1280px;margin:0 auto;">
+        <div class="metaTitle">All Tasks</div>
+        <div class="taskListContainer" id="taskListContainer"></div>
+    </section>
+
+    <section class="panel panel--logs" style="max-width:1280px;margin:0 auto;">
+        <div class="metaTitle">Log Tail</div>
+        <pre class="mono logsBox" id="logs" tabindex="0" role="region" aria-label="Log output">(waiting...)</pre>
+    </section>
+</body>
+
+</html>
