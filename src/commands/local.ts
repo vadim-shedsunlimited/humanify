@@ -16,6 +16,19 @@ export const local = cli()
   .option("-m, --model <model>", "The model to use", DEFAULT_MODEL)
   .option("-o, --outputDir <output>", "The output directory", "output")
   .option(
+    "--resume",
+    "Resume processing an existing --outputDir (skip re-extracting the bundle)"
+  )
+  .option(
+    "--continueOnError",
+    "Continue processing remaining files even if one fails"
+  )
+  .option(
+    "--agents <agents>",
+    "Number of concurrent workers to process extracted modules",
+    "1"
+  )
+  .option(
     "-s, --seed <seed>",
     "Seed for the model to get reproduceable results (leave out for random seed)"
   )
@@ -26,8 +39,8 @@ export const local = cli()
     "The context size to use for the LLM",
     `${DEFAULT_CONTEXT_WINDOW_SIZE}`
   )
-  .argument("input", "The input minified Javascript file")
-  .action(async (filename, opts) => {
+  .argument("[inputs...]", "One or more input minified Javascript files")
+  .action(async (inputs: string[], opts) => {
     if (opts.verbose) {
       verbose.enabled = true;
     }
@@ -40,9 +53,14 @@ export const local = cli()
       disableGpu: opts.disableGpu,
       seed: opts.seed ? parseInt(opts.seed) : undefined
     });
-    await unminify(filename, opts.outputDir, [
+    await unminify(inputs ?? [], opts.outputDir, [
       babel,
       localReanme(prompt, contextWindowSize),
       prettier
-    ]);
+    ], {
+      resume: opts.resume,
+      continueOnError: opts.continueOnError,
+      agents: parseNumber(opts.agents),
+      pipelineId: `local:model=${opts.model};contextSize=${contextWindowSize};seed=${opts.seed ?? ""};disableGpu=${opts.disableGpu ? "1" : "0"}`
+    });
   });
