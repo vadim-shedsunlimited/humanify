@@ -5,13 +5,15 @@ import { url } from "./url.js";
 import { err } from "./cli-error.js";
 import { homedir } from "os";
 import { join } from "path";
-import { ChatWrapper, Llama3_1ChatWrapper } from "node-llama-cpp";
 import { downloadFile } from "ipull";
 import { verbose } from "./verbose.js";
 
 const MODEL_DIRECTORY = join(homedir(), ".humanifyjs", "models");
 
-type ModelDefinition = { url: URL; wrapper?: ChatWrapper };
+type ModelDefinition = {
+  url: URL;
+  wrapperFactory?: () => Promise<unknown>;
+};
 
 export const MODELS: { [modelName: string]: ModelDefinition } = {
   "2b": {
@@ -19,7 +21,10 @@ export const MODELS: { [modelName: string]: ModelDefinition } = {
   },
   "8b": {
     url: url`https://huggingface.co/lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF/resolve/main/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf?download=true`,
-    wrapper: new Llama3_1ChatWrapper()
+    wrapperFactory: async () => {
+      const { Llama3_1ChatWrapper } = await import("node-llama-cpp");
+      return new Llama3_1ChatWrapper();
+    }
   }
 };
 
@@ -31,7 +36,12 @@ export function getModelWrapper(model: string) {
   if (!(model in MODELS)) {
     err(`Model ${model} not found`);
   }
-  return MODELS[model].wrapper;
+  return MODELS[model].wrapperFactory;
+}
+
+export async function getModelChatWrapper(model: string) {
+  const factory = getModelWrapper(model);
+  return factory ? await factory() : undefined;
 }
 
 export async function downloadModel(model: string) {
