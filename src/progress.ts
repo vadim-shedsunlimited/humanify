@@ -245,6 +245,13 @@ export async function showPercentage(percentage: number) {
         const agent = state.agents[ctx.workerId];
         if (agent) {
           agent.progress = Math.max(0, Math.min(100, percentageStr));
+          
+          // Also update the task's progress field
+          const taskIndex = agent.taskIndex;
+          if (typeof taskIndex === 'number' && state.tasks && state.tasks[taskIndex]) {
+            state.tasks[taskIndex].progress = Math.max(0, Math.min(100, percentageStr));
+          }
+          
           await saveTaskState(ctx.outputDir, state);
         }
       }

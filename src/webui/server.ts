@@ -151,7 +151,8 @@ async function summarizeTaskState(outputDir: string) {
       tasks: tasks.map((t: any) => ({
         taskPath: t.path,
         status: t.status,
-        changed: t.changed || false
+        changed: t.changed || false,
+        progress: typeof t.progress === 'number' ? Math.round(t.progress) : 0
       }))
     };
   } catch {

@@ -320,21 +320,25 @@ function renderTaskList(taskState, outputDir) {
         const status = task.status || 'pending';
         const statusColor = statusColorMap[status] || '#757575';
         const changedBadge = task.changed ? '<span class="taskChangedBadge">Changed</span>' : '';
+        const progress = task.progress || 0;
 
         // Only enable diff button for completed and failed tasks
         const diffBtn = (status === 'completed' || status === 'failed')
             ? '<button class="taskDiffBtn" data-output-dir="' + escapeHtmlAttr(outputDir || '') + '" data-task-path="' + escapeHtmlAttr(task.taskPath) + '">View Diff</button>'
             : '<button class="taskDiffBtn" disabled>View Diff</button>';
 
+        const progressBarHtml = '<div class="taskProgressContainer"><span class="taskProgressBar" style="width: ' + progress + '%;"></span></div><span class="taskProgressPercent">' + progress + '%</span>';
+
         return '<tr class="taskRow" data-status="' + escapeHtmlAttr(status) + '">' +
             '<td class="taskName">' + escapeHtml(fileName) + '</td>' +
             '<td class="taskPath small muted">' + escapeHtml(task.taskPath) + '</td>' +
             '<td class="taskStatus"><span class="taskStatusBadge" style="background-color: ' + statusColor + ';">' + status + '</span>' + changedBadge + '</td>' +
+            '<td class="taskProgress">' + progressBarHtml + '</td>' +
             '<td class="taskAction">' + diffBtn + '</td>' +
             '</tr>';
     }).join('');
 
-    taskListContainer.innerHTML = '<table class="taskListTable"><thead><tr><th>File</th><th>Path</th><th>Status</th><th>Action</th></tr></thead><tbody>' + rows + '</tbody></table>';
+    taskListContainer.innerHTML = '<table class="taskListTable"><thead><tr><th>File</th><th>Path</th><th>Status</th><th>Progress</th><th>Action</th></tr></thead><tbody>' + rows + '</tbody></table>';
 
     // Add event listeners to diff buttons
     document.querySelectorAll('.taskDiffBtn:not([disabled])').forEach(function (btn) {

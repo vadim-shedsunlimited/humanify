@@ -783,3 +783,36 @@ pre.logsBox {
     color: var(--muted);
     background: rgba(148, 163, 184, 0.05);
 }
+
+.taskProgress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 150px;
+}
+
+.taskProgressContainer {
+    flex: 1;
+    height: 6px;
+    background: rgba(148, 163, 184, 0.2);
+    border-radius: 3px;
+    overflow: hidden;
+    display: inline-block;
+}
+
+.taskProgressBar {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+    width: var(--progress, 0%);
+    transition: width 0.3s ease;
+}
+
+.taskProgressPercent {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    min-width: 35px;
+    text-align: right;
+}

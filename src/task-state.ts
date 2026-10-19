@@ -16,6 +16,7 @@ export type TaskRecord = {
     changed?: boolean;
     outputBytes?: number;
     outputSha1?: string;
+    progress?: number; // 0-100 percentage
 };
 
 export type TaskState = {
